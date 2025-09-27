@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+    --color-avocado-400: oklch(0.92 0.19 114.08);
+}
+
+@layer components {
+
+}
+
+body{
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+}
