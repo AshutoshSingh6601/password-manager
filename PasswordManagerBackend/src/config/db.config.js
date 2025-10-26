@@ -4,12 +4,16 @@ dotenv.config()
 
 const mongoURI = process.env.MONGO_URI;
 
-mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  socketTimeoutMS: 45000, // Increase socket timeout to 45 seconds
-  connectTimeoutMS: 45000, // Increase connection timeout to 45 seconds
-});
+// mongoose.connect(mongoURI, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+//   socketTimeoutMS: 45000, // Increase socket timeout to 45 seconds
+//   connectTimeoutMS: 45000, // Increase connection timeout to 45 seconds
+// });
+
+mongoose.connect(mongoURI)
+  .then(() => console.log('✅ MongoDB connected successfully'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
 const db = mongoose.connection;
 

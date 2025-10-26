@@ -10,7 +10,7 @@ const Navbar = () => {
 
   return (
     <div className='flex justify-between items-center inset-ring inset-ring-zinc-200 bg-zinc-50 py-2 w-[95%] sm:w-2/3 mx-auto px-2 rounded-full'>
-        <p>Hi<span className='font-semibold'>, {allCredential?.masterUser}</span> </p>
+        <p>Hi, <span className='font-semibold'>{allCredential?.masterUser}</span> </p>
         <p><FiLogOut className='cursor-pointer' title='logout' onClick={handleLogout} /></p>
     </div>
   )

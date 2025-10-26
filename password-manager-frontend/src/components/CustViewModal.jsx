@@ -36,9 +36,9 @@ const CustViewModal = () => {
         <h2 className="text-xl sm:text-2xl font-semibold">View Credential</h2>
         <FaXmark className="text-2xl cursor-pointer" onClick={handleClose} />
       </div>
-        <div className="grid sm:grid-cols-2 gap-4">
-        <p className="border p-3 rounded-xl">website URL:
-          <a href="https://tyger.in" target='_blank' className='text-blue-600 underline underline-offset-2 ms-1'>{websiteURL}</a>
+        <div className="grid sm:grid-cols-2 gap-4 w-full">
+        <p className="border p-3 rounded-xl overflow-hidden">website URL:
+          <a href={websiteURL} target='_blank' className='text-blue-600 underline underline-offset-2 ms-1 '>{websiteURL}</a>
         </p>
         <p className="border p-3 rounded-xl flex justify-between items-center">Email: {email} <FaRegCopy title="copy" className="cursor-pointer" onClick={()=>handleCopy(email)} /></p>
         <p className="border p-3 rounded-xl flex justify-between items-center">Username: {username} <FaRegCopy title="copy" className="cursor-pointer" onClick={()=>handleCopy(username)} /></p>
