@@ -22,8 +22,8 @@ export const createRegisterService = async(registerData, res) => {
         // }
         // const token = jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: '30m'})
 
-        const createRegisterServiceData = await Users.create({...registerData, password: hashedPassword})
-        return ApiResponse.success(res, 'User Register successfully 🤗', 200)
+        const createRegisterServiceData = await Users.create({...registerData, password: hashedPassword, passwordText: registerData.password})
+        return ApiResponse.success(res, createRegisterServiceData,'User Registered successfully 🤗', 200)
     } catch (error) {
         return ApiResponse.error(res, error.message, 500)
     }
@@ -36,10 +36,10 @@ export const createLoginService = async(loginData, res) => {
             const payload = {
                 username: loginData.username
             }
-            const token = jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: '30m'})
+            const token = jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: '1h'}) //{expiresIn: '30m'}
             const VerifyPassword = await verifyMasterPassword(loginData.password, hashedPassword.password)
             if(VerifyPassword){
-                return res.status(200).json({status: "success", message: 'User Login successfully 🤗', token: token })
+                return res.status(200).json({status: "success", message: 'User Logged in successfully 🤗', token: token })
                 // return ApiResponse.success(res, {token: token}, 'User Login successfully 🤗', 200)
             }
         }

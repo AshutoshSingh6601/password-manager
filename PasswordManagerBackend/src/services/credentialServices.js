@@ -31,13 +31,31 @@ export const createCredService = async (credData, res) => {
   }
 };
 
+export const verifyMasterPassService = async (credData, res) => {
+  try {
+    const userDetail = await Users.findOne({ username: credData.user });
+    const encryptedPassword = await verifyMasterPassword(
+      credData.password,
+      userDetail.password
+    );
+    if(encryptedPassword){
+      return res.status(200).json({status: "success", message: "Verified", isVerified: encryptedPassword})
+    }
+    return ApiResponse.error(
+      res,
+      "Invalid Credential 😒",
+      400
+    );
+  } catch (error) {
+    return ApiResponse.error(res, error.message, 500);
+  }
+};
+
 export const decryptCredService = async (reqData, res) => {
-  const { credId, userPass } = reqData;
+  const { credId } = reqData;
   try {
     const credDetail = await Credential.findOne({ _id: credId }).lean(); // returns plain JS object Use .toObject() or .lean()
-    const user = await Users.findOne({ _id: credDetail.userId });
-    const isValidUser = await verifyMasterPassword(userPass, user.password);
-    if (isValidUser) {
+    if (credDetail) {
       const decryptPassword = decryptSitePassword(
         process.env.SECRET_KEY,
         credDetail.password,
@@ -47,11 +65,86 @@ export const decryptCredService = async (reqData, res) => {
       return ApiResponse.success(
         res,
         viewCredWithPassword,
-        "Credential fetched successfully 🤗",
+        "Password Decoded successfully 🤗",
         200
       );
     } else {
-      return ApiResponse.error(res, "Credential not match 😒", 400);
+      return ApiResponse.error(res, "Cred id not match 😒", 400);
+    }
+  } catch (error) {
+    return ApiResponse.error(res, error.message, 500);
+  }
+};
+
+export const updateSpecificCredService = async (reqData, res) => {
+  const { websiteURL, websiteName, email, username, password, credId } = reqData;
+  try {
+     let encryptUpdatedPass
+    if(password){
+      encryptUpdatedPass = await encryptSitePassword(process.env.SECRET_KEY, password)
+    }
+      const updatedCredWithEncryptedPass = { websiteName, websiteURL, email, username, password: encryptUpdatedPass?.encrypted, iv: encryptUpdatedPass?.iv };
+      const credDetail = await Credential.findOneAndUpdate({ _id: credId }, updatedCredWithEncryptedPass);
+      // const credDetail = await Credential.updateOne({ _id: credId }, { $set: updatedCredWithEncryptedPass });
+      if(credDetail){
+      return ApiResponse.success(
+        res,
+        credDetail,
+        "Credential Updated successfully 🤗",
+        200
+      );
+      } else {
+      return ApiResponse.error(res, "Credential id not match 😒", 400);
+    }
+  } catch (error) {
+    return ApiResponse.error(res, error.message, 500);
+  }
+};
+
+export const deleteSpecificCredService = async (reqData, res) => {
+  const { credId } = reqData;
+  try {
+
+    const credDetail = await Credential.findOneAndDelete({_id: credId})
+    if(credDetail){
+    return ApiResponse.success(
+        res,
+        credDetail,
+        "Credential Deleted successfully 🤗",
+        200
+      );
+      } else {
+      return ApiResponse.error(res, "Credential id not match 😒", 400);
+    }
+  } catch (error) {
+    return ApiResponse.error(res, error.message, 500);
+  }
+};
+
+export const getAllCredsService = async (MasterUsername, res) => {
+  try {
+     const credDetail = await Users.findOne({ username: MasterUsername });
+    if (!credDetail) {
+      return ApiResponse.error(res, "User not found 😒", 400);
+    }
+    const allCred = await Credential.find({userId: credDetail._id}).lean()
+    const decryptedPass = allCred.map((cred)=>{
+      const decryptPassword = decryptSitePassword(
+        process.env.SECRET_KEY,
+        cred.password,
+        cred.iv
+      );
+      return {...cred, password:decryptPassword}
+    })
+    if (allCred) {
+      return ApiResponse.success(
+        res,
+        decryptedPass,
+        "Password Decoded successfully 🤗",
+        200
+      );
+    } else {
+      return ApiResponse.error(res, "You don't have any credential 😒", 400);
     }
   } catch (error) {
     return ApiResponse.error(res, error.message, 500);
@@ -65,12 +158,13 @@ export const getCredService = async (MasterUsername, res) => {
       return ApiResponse.error(res, "You don't have any credential 😒", 400);
     }
     const allCred = await Credential.find({userId: credDetail._id})
-    return ApiResponse.success(
-      res,
-      allCred,
-      "Credential fetched successfully 🤗",
-      200
-    );
+    // return ApiResponse.success(
+    //   res,
+    //   allCred,
+    //   "Credential fetched successfully 🤗",
+    //   200
+    // );
+    return res.status(200).json({status: 'success', message: "Credential fetched successfully 🤗", masterUser: MasterUsername, data: allCred})
   } catch (error) {
     return ApiResponse.error(res, error.message, 500);
   }

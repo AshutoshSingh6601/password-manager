@@ -5,22 +5,35 @@ import CustButton from "../../components/CustButton";
 import CustTable from "../../components/CustTable";
 import CustViewModal from "../../components/CustViewModal";
 import CustDecryptModal from "../../components/CustDecryptModal";
+import CustUpdateModel from "../../components/CustUpdateModel";
+import Navbar from "../../components/Navbar";
+import { useNavigate } from "react-router-dom";
+import authContext from "../../context/auth/authContext";
 
 const PasswordManager = () => {
   const { credInput, setCredInput, allCredential, allCred, handleNewCred, isModal, setIsModal } = useContext(credContext);
+  const { authToken, setAuthToken } = useContext(authContext)
 
   const handleChange = (e) => {
     setCredInput({ ...credInput, [e.target.name]: e.target.value });
   };
 
+  const navigate = useNavigate()
+
   useEffect(() => {
-    allCred()
+    if(localStorage.getItem("authToken")){
+      allCred()
+    }else{
+      navigate('/')
+    }
   }, [])
   
 
   return (
     <>
-    <div className="w-2/3 mx-auto mt-10 p-5 rounded shadow">
+    <div className="min-h-dvh bg-sky-50 pt-2">
+    <Navbar />
+    <div className="w-[95%] sm:w-2/3 mx-auto mt-10 p-2 sm:p-5 rounded-xl inset-ring inset-ring-zinc-200 bg-zinc-50">
       <h2 className="text-center mb-3 text-2xl font-semibold font-sans">
         Password Manager
       </h2>
@@ -29,15 +42,26 @@ const PasswordManager = () => {
       <form onSubmit={handleNewCred}>
         <div className="grid grid-cols-2 gap-4">
           <CustInput
-            label="URL"
+            label="Website URL"
+            type="text"
+            className="flex flex-col gap-1 col-span-2"
+            value={credInput.websiteURL}
+            onChange={handleChange}
+            name="websiteURL"
+            placeholder="Website URL"
+          />
+          <CustInput
+            label="Website Name"
+            placeholder="Website Name"
             type="text"
             className="flex flex-col gap-1"
-            value={credInput.url}
+            value={credInput.websiteName}
             onChange={handleChange}
-            name="url"
+            name="websiteName"
           />
           <CustInput
             label="Email"
+            placeholder="Email"
             type="email"
             className="flex flex-col gap-1"
             value={credInput.email}
@@ -46,6 +70,7 @@ const PasswordManager = () => {
           />
           <CustInput
             label="Username"
+            placeholder="Username"
             type="text"
             className="flex flex-col gap-1"
             value={credInput.username}
@@ -54,6 +79,7 @@ const PasswordManager = () => {
           />
           <CustInput
             label="Password"
+            placeholder="Password"
             type="password"
             className="flex flex-col gap-1"
             value={credInput.password}
@@ -65,20 +91,24 @@ const PasswordManager = () => {
           <CustButton
             type="submit"
             label="Save"
-            className=" py-2 mt-5 max-w-[10%] min-w-[15%] "
+            className=" py-2 mt-5 w-20 "
           />
         </div>
       </form>
-
+   </div>
       {/* ========table========= */}
-      <CustTable allData={allCredential} />
-
+      <div className="flex flex-nowrap inset-ring inset-ring-zinc-200 bg-zinc-50 overflow-x-auto my-10 rounded-xl p-3 w-[95%] sm:w-2/3 mx-auto">
+        <CustTable allData={allCredential?.data} />
+      </div>
     </div>
+
+ 
 
     
       {/* ========modal========= */}
       {isModal === 'viewCred' && <CustViewModal />}
-      {isModal === 'masterCred' && <CustDecryptModal />}
+      {isModal === 'updateCred' && <CustUpdateModel />}
+      {/* {isModal === 'masterCred' && <CustDecryptModal />} */}
     </>
   );
 };

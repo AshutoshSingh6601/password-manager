@@ -1,6 +1,6 @@
 import React from 'react'
 
-const CustInput = ({label, type, value, onChange, name, className}) => {
+const CustInput = ({label, type, value, onChange, name, className, placeholder}) => {
   return (
     <div className={className}>
           <label htmlFor="username" className='font-[500] text-[#333]'>{label}</label>
@@ -11,7 +11,7 @@ const CustInput = ({label, type, value, onChange, name, className}) => {
             value={value}
             onChange={onChange}
             required
-            placeholder="Enter your username"
+            placeholder={`Enter your ${placeholder}`}
           />
         </div>
   )

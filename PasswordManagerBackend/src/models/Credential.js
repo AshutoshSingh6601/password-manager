@@ -6,7 +6,10 @@ const credentials = new mongoose.Schema({
         ref: 'users',
         required: true
     },
-    website: {
+    websiteURL: {
+        type: String
+    },
+    websiteName: {
         type: String
     },
     email: {

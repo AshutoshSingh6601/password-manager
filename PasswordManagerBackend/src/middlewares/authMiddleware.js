@@ -5,7 +5,7 @@ const authToken = (req, res, next) => {
     const token = req.header('Authorization')?.split(' ')[1]; //Extract token from "Authorization: Bearer <token>"
 
     if(!token){
-        return res.status(403).json({ message: 'No token, authorization denied' });
+        return res.status(401).json({ message: 'No token, authorization denied' });
     }
 
     // const tokenVerify = jwt.verify(token, process.env.JWT_SECRET)
@@ -18,7 +18,7 @@ const authToken = (req, res, next) => {
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user)=>{
         if(err){
-            return res.status(401).json({ message: 'Token is not valid' });
+            return res.status(403).json({ message: 'Token is not valid' });
         }
 
         req.MasterUsername = user?.username

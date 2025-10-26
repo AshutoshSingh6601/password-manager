@@ -9,10 +9,10 @@ function App() {
   return (
     <>
       <BrowserRouter>
-        <CredState>
           <AuthState>
+        <CredState>
               <ToastContainer
-                position="top-right"
+                position="top-center"
                 autoClose={5000}
                 hideProgressBar={false}
                 newestOnTop={false}
@@ -28,8 +28,8 @@ function App() {
               <Route path="/" element={<Login />} />
               <Route path="/home" element={<PasswordManager />} />
             </Routes>
-          </AuthState>
         </CredState>
+          </AuthState>
       </BrowserRouter>
     </>
   );

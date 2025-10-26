@@ -1,9 +1,9 @@
-import { Bounce, toast } from "react-toastify";
+import { Bounce, Slide, toast } from "react-toastify";
 
 export const successMessage = (message) => {
     return(
         toast.success(message || 'saved successfully', {
-            position: "top-right",
+            position: "top-center", //top-right
             autoClose: 3000,
             hideProgressBar: false,
             closeOnClick: false,
@@ -11,7 +11,7 @@ export const successMessage = (message) => {
             draggable: true,
             progress: undefined,
             theme: "light",
-            transition: Bounce,
+            transition: Slide, //Bounce
         })
     )
 }
@@ -19,7 +19,7 @@ export const successMessage = (message) => {
 export const errorMessage = (message) => {
     return(
         toast.error(message || 'Not Saved', {
-            position: "top-right",
+            position: "top-center", //top-right
             autoClose: 3000,
             hideProgressBar: false,
             closeOnClick: false,
@@ -27,7 +27,7 @@ export const errorMessage = (message) => {
             draggable: true,
             progress: undefined,
             theme: "light",
-            transition: Bounce,
+            transition: Slide, //Bounce
         })
     )
 }
