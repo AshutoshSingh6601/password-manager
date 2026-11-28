@@ -1,22 +1,31 @@
-import express from 'express'
-import authToken from '../middlewares/authMiddleware.js'
-import { createCred, decryptCred, deleteSpecificCred, getAllCreds, getCred, updateSpecificCred, verifyMasterPass } from '../controllers/credentialController.js'
+import express from "express";
+import authToken from "../middlewares/authMiddleware.js";
+import {
+  createCred,
+  decryptCred,
+  deleteSpecificCred,
+  getAllCreds,
+  getCred,
+  updateSpecificCred,
+  verifyMasterPass
+} from "../controllers/credentialController.js";
+import { authLimiter } from "../middlewares/rateLimiter.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.post('/encryptPass' , authToken, createCred)
+// Encrypt and save new credential
+router.post("/encryptPass", authToken, createCred);
 
-router.post('/verifyMasterPass' , authToken, verifyMasterPass)
+// Verify master password (rate-limited)
+router.post("/verifyMasterPass", authToken, authLimiter, verifyMasterPass);
 
-router.get('/credView' , authToken, decryptCred)
+// Single credential view, update, delete
+router.get("/credView", authToken, decryptCred);
+router.put("/credView", authToken, updateSpecificCred);
+router.delete("/credView", authToken, deleteSpecificCred);
 
-router.get('/getAllCreds' , authToken, getAllCreds)
+// Fetch all credentials
+router.get("/getAllCreds", authToken, getAllCreds);
+router.get("/", authToken, getCred);
 
-router.put('/credView' , authToken, updateSpecificCred)
-
-router.delete('/credView' , authToken, deleteSpecificCred)
-
-router.get('/' , authToken, getCred)
-
-
-export default router
+export default router;

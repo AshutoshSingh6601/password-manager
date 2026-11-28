@@ -1,50 +1,81 @@
-import React, { useContext } from 'react'
+import React, { useContext } from "react";
 import { FaXmark } from "react-icons/fa6";
-import { FaRegCopy } from "react-icons/fa6";
-import CustButton from './CustButton';
-import CustInput from './CustInput';
-import credContext from '../context/credential/credContext';
+import CustButton from "./CustButton";
+import CustInput from "./CustInput";
+import credContext from "../context/credential/credContext";
 
 const CustDecryptModal = () => {
+  const {
+    masterPassword,
+    setMasterPassword,
+    setIsModal,
+    handleVerifyMasterPass,
+    allCredential
+  } = useContext(credContext);
 
-    const { masterPassword, setMasterPassword, setIsModal, handleVerifyMasterPass } = useContext(credContext);
+  const handleCloseDecryptModal = () => {
+    setMasterPassword("");
+    setIsModal("");
+  };
 
-    const handleDecryptModal = () => {
-        setIsModal('viewCred')
-    }
+  const username = allCredential?.masterUser || "Account Owner";
 
-    const handleCloseDecryptModal = () => {
-        setIsModal('')
-    }
-    
   return (
     <>
-    <div className="bg-stone-00 w-dvw h-dvh absolute top-0 blur-xs backdrop-blur-xs ">
-    </div>
-      <div className="bg-indigo-50 p-5 sm:p-10 w-[90%] md:w-1/2 rounded-2xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-      <div className="flex justify-between items-center mb-10">
-        <h2 className="text-xl sm:text-2xl font-semibold">Master Credential</h2>
-        <FaXmark className="text-xl sm:text-2xl cursor-pointer" onClick={handleCloseDecryptModal} />
-      </div>
-      <form onSubmit={handleVerifyMasterPass}>
-        <div className="grid sm:grid-cols-2 gap-4">
-        {/* <p className="border p-3 rounded-xl">Title:
-          <a href="https://tyger.in" target='_blank' className='text-blue-600 underline underline-offset-2 ms-1'>https://tyger.in</a>
-        </p> */}
-        <p className="col-span-2 sm:col-span-1 border p-3 rounded-xl">Name: Ashutosh</p>
-        <p className='col-span-2 text-[9px] sm:text-sm'>Need to Enter login password to <span className='font-semibold italic'>decrypt</span> Credential and view.</p>
+      <div
+        className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 transition-opacity"
+        onClick={handleCloseDecryptModal}
+      />
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-50 p-5 sm:p-8 w-[90%] md:w-[480px] rounded-2xl shadow-2xl z-50">
+        <div className="flex justify-between items-center mb-6 border-b border-indigo-200 pb-3">
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
+            Master Credential Verification
+          </h2>
+          <button
+            type="button"
+            onClick={handleCloseDecryptModal}
+            className="text-gray-500 hover:text-gray-800 p-1 rounded-full cursor-pointer"
+            aria-label="Close"
+          >
+            <FaXmark className="text-xl sm:text-2xl" />
+          </button>
+        </div>
+        <form onSubmit={handleVerifyMasterPass}>
+          <div className="grid gap-4">
+            <p className="border border-indigo-200 bg-white p-3 rounded-xl text-sm font-medium text-gray-700">
+              User: <span className="font-semibold text-gray-900">{username}</span>
+            </p>
+            <p className="text-xs text-gray-600">
+              Enter your account master password to verify identity and decrypt sensitive credentials.
+            </p>
 
-        <CustInput label='Password' type='password' value={masterPassword} onChange={(e)=>setMasterPassword(e.target.value)} name='masterPassword' className='flex flex-col gap-1 col-span-2' />
-        {/* <p className="border p-3 rounded-xl col-span-2">Password: 12345</p> */}
-        </div>
-        <div className="text-end mt-10">
-        <CustButton className='bg-green-600 hover:bg-green-700 py-2 me-3' type='submit' label='Submit' />
-        <CustButton className='bg-red-600 hover:bg-red-700 py-2' label='Cancel' type='button' onClick={handleCloseDecryptModal} />
-        </div>
-      </form>
+            <CustInput
+              label="Master Password"
+              type="password"
+              value={masterPassword}
+              onChange={(e) => setMasterPassword(e.target.value)}
+              name="masterPassword"
+              required
+              className="flex flex-col gap-1"
+            />
+          </div>
+          <div className="text-end mt-8 flex justify-end gap-3">
+            <CustButton
+              className="bg-gray-500 hover:bg-gray-600 py-2 px-4"
+              label="Cancel"
+              type="button"
+              onClick={handleCloseDecryptModal}
+            />
+            <CustButton
+              className="bg-emerald-600 hover:bg-emerald-700 py-2 px-5"
+              type="submit"
+              label="Verify & Continue"
+            />
+          </div>
+        </form>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default CustDecryptModal
+export default CustDecryptModal;

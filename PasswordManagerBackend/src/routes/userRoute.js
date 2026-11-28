@@ -1,12 +1,16 @@
-import express from 'express'
-import { createLogin, createRegister, getLogin } from '../controllers/userController.js'
+import express from "express";
+import { createLogin, createRegister, getLogin } from "../controllers/userController.js";
+import { authLimiter } from "../middlewares/rateLimiter.js";
+import authToken from "../middlewares/authMiddleware.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.get('/', getLogin)
+// Safe authenticated profile route
+router.get("/", authToken, getLogin);
+router.get("/me", authToken, getLogin);
 
-router.post('/register', createRegister)
+// Rate-limited auth routes
+router.post("/register", authLimiter, createRegister);
+router.post("/", authLimiter, createLogin);
 
-router.post('/', createLogin)
-
-export default router
+export default router;

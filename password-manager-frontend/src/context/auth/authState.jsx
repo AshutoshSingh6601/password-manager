@@ -1,96 +1,149 @@
-import { useEffect, useState } from "react";
+import { useState, useCallback } from "react";
 import AuthContext from "./authContext";
 import { BASE_URL } from "../../config";
 import { useNavigate } from "react-router-dom";
 import { errorMessage, successMessage } from "../../utils/AlertMessage";
 
-const authState = ({children}) => {
+const AuthState = ({ children }) => {
+  const [loginState, setLoginState] = useState({
+    email: "",
+    username: "",
+    password: ""
+  });
 
-    const [loginState, setLoginState] = useState({
-        email: '',
-        username: '',
-        password: ''
-    })
+  const [authToken, setAuthToken] = useState(() => {
+    const savedToken = localStorage.getItem("authToken");
+    return savedToken && savedToken !== "undefined" && savedToken !== "null" ? savedToken : "";
+  });
 
-    const [authToken, setAuthToken] = useState(()=>`Bearer ${localStorage.getItem("authToken")}` || '')
-    
-    useEffect(() => {
-      const token = localStorage.getItem("authToken");
-      setAuthToken(`Bearer ${token}`)
-    }, [authToken]);
-    
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginType, setLoginType] = useState("login");
 
-    const [loginType, setLoginType] = useState('login')
+  const navigate = useNavigate();
 
-    const navigator = useNavigate()
+  const handleLogin = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (isLoading) return;
 
-    const handleLogin = async(e) => {
-        e.preventDefault()
-        const header = {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'Application/json'  
-            },
-            body: JSON.stringify({username: loginState.username, password: loginState.password })
-        }
-        try {
-            const res = await fetch(`${BASE_URL}/api/v1/login`,header)
-            const data = await res.json()
-            if(data.status==="success"){
-                console.log(data.token)
-                setLoginState({
-                    username: '',
-                    password: ''
-                })
-                setAuthToken(`Bearer ${localStorage.setItem('authToken', data?.token)}`)
-                // localStorage.setItem('authToken', `Bearer ${data.token}`)
-                navigator('/home')
-            }else{
-                errorMessage(data.message)
-            }
-        } catch (error) {
-            errorMessage(error.message)
-        }
+    if (!loginState.username.trim() || !loginState.password) {
+      errorMessage("Please enter both username and password");
+      return;
     }
 
-    const handleSignIn = async(e) => {
-        e.preventDefault()
-        const header = {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'Application/json'  
-            },
-            body: JSON.stringify(loginState)
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${BASE_URL}/api/v1/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username: loginState.username.trim(),
+          password: loginState.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && (data.success || data.status === "success")) {
+        const token = data.token || data.data?.token;
+        if (token) {
+          localStorage.setItem("authToken", token);
+          setAuthToken(token);
+          setLoginState({
+            email: "",
+            username: "",
+            password: ""
+          });
+          successMessage(data.message || "Logged in successfully!");
+          navigate("/home");
+        } else {
+          errorMessage("Login succeeded but no authentication token was received");
         }
-        try {
-            const res = await fetch(`${BASE_URL}/api/v1/login/register`,header)
-            const data = await res.json()
-            if(data.status==="success"){
-                successMessage(data.message)
-                setLoginState({
-                    email: '',
-                    username: '',
-                    password: ''
-                })
-                setLoginType('login')
-            }else{
-                errorMessage(data.message)
-            }
-        } catch (error) {
-            errorMessage(error.message)
-        }
+      } else {
+        errorMessage(data.message || "Invalid credentials");
+      }
+    } catch (error) {
+      errorMessage(error.message || "Network error. Please check your backend connection");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignIn = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (isLoading) return;
+
+    if (!loginState.username.trim() || !loginState.email.trim() || !loginState.password) {
+      errorMessage("Please fill in all fields (username, email, password)");
+      return;
     }
 
-    const handleLogout = async(e)=> {
-        localStorage.removeItem("authToken")
-        navigator('/')
+    if (loginState.password.length < 6) {
+      errorMessage("Password must be at least 6 characters long");
+      return;
     }
 
-    return(
-        <AuthContext.Provider value={{loginState, setLoginState, handleLogin, handleSignIn, loginType, setLoginType, handleLogout, authToken, setAuthToken, }}>
-            {children}
-        </AuthContext.Provider>
-    )
-}
+    setIsLoading(true);
 
-export default authState
+    try {
+      const response = await fetch(`${BASE_URL}/api/v1/login/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username: loginState.username.trim(),
+          email: loginState.email.trim(),
+          password: loginState.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && (data.success || data.status === "success")) {
+        successMessage(data.message || "Account registered successfully! Please log in.");
+        setLoginState({
+          email: "",
+          username: "",
+          password: ""
+        });
+        setLoginType("login");
+      } else {
+        errorMessage(data.message || "Registration failed");
+      }
+    } catch (error) {
+      errorMessage(error.message || "Network error. Please try again later");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem("authToken");
+    setAuthToken("");
+    navigate("/");
+  }, [navigate]);
+
+  return (
+    <AuthContext.Provider
+      value={{
+        loginState,
+        setLoginState,
+        handleLogin,
+        handleSignIn,
+        loginType,
+        setLoginType,
+        handleLogout,
+        authToken,
+        setAuthToken,
+        isLoading
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export default AuthState;

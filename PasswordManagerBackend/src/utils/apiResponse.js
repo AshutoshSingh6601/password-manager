@@ -1,21 +1,28 @@
 class ApiResponse {
+  /**
+   * Standardized success response
+   */
+  static success(res, data = null, message = "Operation completed successfully", status = 200, extra = {}) {
+    return res.status(status).json({
+      success: true,
+      status: "success",
+      message,
+      data,
+      ...extra
+    });
+  }
 
-    static success(res, data=null, message='Request was successful', status=200){
-        res.status(status).json({
-            status: 'success', 
-            message,
-            data,
-        })
-    }
-
-    static error(res, message='Something went wrong', status=500, data=null){
-        res.status(status).json({
-            status: 'failed',
-            message,
-            data
-        })
-    }
-
+  /**
+   * Standardized error response
+   */
+  static error(res, message = "Something went wrong", status = 500, errors = []) {
+    return res.status(status).json({
+      success: false,
+      status: "failed",
+      message,
+      errors: Array.isArray(errors) ? errors : (errors ? [errors] : [])
+    });
+  }
 }
 
-export default ApiResponse
+export default ApiResponse;

@@ -1,9 +1,10 @@
-import app from './src/app.js';
-import mongoose from "./src/config/db.config.js";
+import app from "./src/app.js";
+import "./src/config/db.config.js";
 
+const port = process.env.PORT || 4002;
 
-const port = process.env.PORT || 4000
+const server = app.listen(port, () => {
+  console.log(`🚀 Password Manager Server listening on http://localhost:${port}`);
+});
 
-app.listen(port, ()=> {
-    console.log(`Server listening on http://localhost:${port}`)
-})
+export default server;

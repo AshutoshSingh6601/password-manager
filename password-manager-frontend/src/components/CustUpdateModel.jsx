@@ -1,6 +1,5 @@
 import React, { useContext, useEffect } from "react";
 import { FaXmark } from "react-icons/fa6";
-import { FaRegCopy } from "react-icons/fa6";
 import CustButton from "./CustButton";
 import CustInput from "./CustInput";
 import credContext from "../context/credential/credContext";
@@ -8,64 +7,78 @@ import credContext from "../context/credential/credContext";
 const CustUpdateModel = () => {
   const {
     setIsModal,
-    handleVerifyMasterPass,
     viewModalData,
+    setViewModalData,
     eCredInput,
     setECredInput,
-    handleUpdateCred
+    handleUpdateCred,
+    isUpdating
   } = useContext(credContext);
-  const {_id, websiteURL, websiteName, email, username, password } = viewModalData;
+
+  const { _id, websiteURL, websiteName, email, username, password } = viewModalData || {};
 
   const handleChange = (e) => {
-    setECredInput({ ...eCredInput, [e.target.name]: e.target.value });
+    setECredInput((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleCloseDecryptModal = () => {
+  const handleClose = () => {
+    setViewModalData({});
     setIsModal("");
   };
 
-  // const handleUpdate = (e) => {
-  //   e.preventDefault()
-  //   handleUpdateCred(_id)
-  // }
-
   useEffect(() => {
-    setECredInput({
-      ewebsiteURL: websiteURL,
-      ewebsiteName: websiteName,
-      eemail: email,
-      eusername: username,
-      epassword: password,
-    });
-  }, []);
+    if (viewModalData && _id) {
+      setECredInput({
+        ewebsiteURL: websiteURL || "",
+        ewebsiteName: websiteName || "",
+        eemail: email || "",
+        eusername: username || "",
+        epassword: password || ""
+      });
+    }
+  }, [viewModalData, _id, websiteURL, websiteName, email, username, password, setECredInput]);
 
   return (
     <>
-      <div className="bg-stone-00 w-dvw h-dvh absolute top-0 blur-xs backdrop-blur-xs "></div>
-      <div className="bg-indigo-50 p-5 sm:p-10 w-[90%] md:w-1/2 rounded-2xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <div className="flex justify-between items-center mb-3 sm:mb-10">
-          <h2 className="text-xl sm:text-2xl font-semibold">
-            Edit Credential
-          </h2>
-          <FaXmark
-            className="text-xl sm:text-2xl cursor-pointer"
-            onClick={handleCloseDecryptModal}
-          />
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 transition-opacity"
+        onClick={handleClose}
+      />
+
+      {/* Modal Dialog */}
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-50 p-5 sm:p-8 w-[92%] sm:w-[560px] rounded-2xl shadow-2xl z-50 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6 border-b border-indigo-200 pb-3">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+              Edit Credential
+            </h2>
+            <p className="text-xs text-gray-500">Update and re-encrypt credential</p>
+          </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="text-gray-500 hover:text-gray-800 p-1 rounded-full hover:bg-indigo-100 transition-colors cursor-pointer"
+            aria-label="Close modal"
+          >
+            <FaXmark className="text-2xl" />
+          </button>
         </div>
-        <form onSubmit={(e)=>handleUpdateCred(e,_id)}>
+
+        <form onSubmit={(e) => handleUpdateCred(e, _id)}>
           <div className="grid sm:grid-cols-2 gap-4">
             <CustInput
               label="Website URL"
-              placeholder="Website URL"
+              placeholder="e.g. https://google.com"
               type="text"
-              className="flex flex-col gap-1"
+              className="flex flex-col gap-1 sm:col-span-2"
               value={eCredInput.ewebsiteURL}
               onChange={handleChange}
               name="ewebsiteURL"
             />
             <CustInput
               label="Website Name"
-              placeholder="Website Name"
+              placeholder="e.g. Google"
               type="text"
               className="flex flex-col gap-1"
               value={eCredInput.ewebsiteName}
@@ -74,8 +87,8 @@ const CustUpdateModel = () => {
             />
             <CustInput
               label="Email"
-              placeholder="Email"
-              type="text"
+              placeholder="Account email"
+              type="email"
               className="flex flex-col gap-1"
               value={eCredInput.eemail}
               onChange={handleChange}
@@ -83,8 +96,9 @@ const CustUpdateModel = () => {
             />
             <CustInput
               label="Username"
-              placeholder="Username"
+              placeholder="Username / Login ID"
               type="text"
+              required
               className="flex flex-col gap-1"
               value={eCredInput.eusername}
               onChange={handleChange}
@@ -92,25 +106,30 @@ const CustUpdateModel = () => {
             />
             <CustInput
               label="Password"
-              placeholder="Password"
+              placeholder="New password"
               type="text"
+              required
               className="flex flex-col gap-1"
               value={eCredInput.epassword}
               onChange={handleChange}
               name="epassword"
             />
           </div>
-          <div className="text-end mt-10">
+
+          <div className="text-end mt-8 pt-4 border-t border-indigo-200 flex justify-end gap-3">
             <CustButton
-              className="bg-green-600 hover:bg-green-700 py-2 me-3"
-              type="submit"
-              label="Edit"
-            />
-            <CustButton
-              className="bg-red-600 hover:bg-red-700 py-2"
+              className="bg-gray-500 hover:bg-gray-600 py-2 px-4"
               label="Cancel"
               type="button"
-              onClick={handleCloseDecryptModal}
+              onClick={handleClose}
+              disabled={isUpdating}
+            />
+            <CustButton
+              className="bg-emerald-600 hover:bg-emerald-700 py-2 px-6"
+              type="submit"
+              label="Save Changes"
+              loading={isUpdating}
+              disabled={isUpdating}
             />
           </div>
         </form>
